@@ -42,7 +42,7 @@ namespace FuryFront.Core.Settings
         // Имитация анализа оборудования.
         public void AnalyzeHardware()
         {
-            // В реальном проекте здесь были бы обращения к системе.
+            // Определение параметров оборудования игрока.
             CurrentHardware = new HardwareInfo
             {
                 CpuModel = "Simulated CPU",
