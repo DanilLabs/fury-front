@@ -64,7 +64,7 @@ namespace FuryFront.Core.Settings
                 RecommendedProfile = new GraphicsProfile
                 {
                     Name = "High",
-                    TargetFps = 60,
+                    TargetFps = 70,
                     TextureQuality = 3,
                     ShadowQuality = 3,
                     AntiAliasingEnabled = true
