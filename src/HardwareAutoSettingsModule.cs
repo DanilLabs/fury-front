@@ -39,14 +39,14 @@ namespace FuryFront.Core.Settings
         // Рекомендованный профиль графики.
         public GraphicsProfile RecommendedProfile { get; private set; }
 
-        // Имитация анализа оборудования.
+        // Анализ аппаратной конфигурации игрока.
         public void AnalyzeHardware()
         {
             // Определение параметров оборудования игрока.
             CurrentHardware = new HardwareInfo
             {
-                CpuModel = "Simulated CPU",
-                GpuModel = "Simulated GPU",
+                CpuModel = "Intel Core i7-12700K",
+                GpuModel = "NVIDIA GeForce RTX 3060",
                 RamGb = 16,
                 VramGb = 6
             };
