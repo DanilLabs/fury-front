@@ -3,30 +3,76 @@ using System.Collections.Generic;
 
 namespace FuryFront.Core.UI
 {
-    // Тип экрана главного меню.
+    /// <summary>
+    /// Тип экрана главного меню.
+    /// </summary>
     public enum MainMenuScreen
     {
+        /// <summary>
+        /// Экран не задан.
+        /// </summary>
         None,
+
+        /// <summary>
+        /// Титульный экран.
+        /// </summary>
         Title,
+
+        /// <summary>
+        /// Основное меню.
+        /// </summary>
         Main,
+
+        /// <summary>
+        /// Экран начала новой кампании.
+        /// </summary>
         NewCampaign,
+
+        /// <summary>
+        /// Экран загрузки сохранённой игры.
+        /// </summary>
         LoadGame,
+
+        /// <summary>
+        /// Экран настроек.
+        /// </summary>
         Settings,
+
+        /// <summary>
+        /// Экран подтверждения выхода из игры.
+        /// </summary>
         ExitConfirmation
     }
 
-    // Пункт меню.
+    /// <summary>
+    /// Пункт главного меню.
+    /// </summary>
     public class MenuItem
     {
-        // Уникальный идентификатор пункта.
+        /// <summary>
+        /// Уникальный идентификатор пункта меню.
+        /// </summary>
         public string Id { get; }
 
-        // Отображаемое название.
+        /// <summary>
+        /// Отображаемое название пункта меню.
+        /// </summary>
         public string Title { get; }
 
-        // Доступен ли пункт для выбора.
+        /// <summary>
+        /// Признак того, что пункт доступен для выбора.
+        /// </summary>
         public bool IsEnabled { get; set; }
 
+        /// <summary>
+        /// Создаёт новый пункт главного меню.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор пункта.</param>
+        /// <param name="title">Текст, отображаемый игроку.</param>
+        /// <param name="isEnabled">Начальное состояние доступности пункта.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="id"/> или <paramref name="title"/> равны null.
+        /// </exception>
         public MenuItem(string id, string title, bool isEnabled = true)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
@@ -35,24 +81,35 @@ namespace FuryFront.Core.UI
         }
     }
 
-    // Модуль титульного экрана и главного меню.
+    /// <summary>
+    /// Модуль титульного экрана и главного меню игры.
+    /// </summary>
     public class MainMenuModule
     {
-        // Текущий активный экран.
+        /// <summary>
+        /// Текущий активный экран главного меню.
+        /// </summary>
         public MainMenuScreen CurrentScreen { get; private set; }
 
-        // Набор пунктов главного меню.
+        /// <summary>
+        /// Набор доступных пунктов главного меню.
+        /// </summary>
         public IReadOnlyList<MenuItem> Items => _items.AsReadOnly();
 
         private readonly List<MenuItem> _items = new List<MenuItem>();
 
+        /// <summary>
+        /// Создаёт модуль главного меню и инициализирует стандартные пункты.
+        /// </summary>
         public MainMenuModule()
         {
             InitializeDefaultItems();
             CurrentScreen = MainMenuScreen.Title;
         }
 
-        // Инициализация стандартного набора пунктов меню.
+        /// <summary>
+        /// Инициализирует стандартный набор пунктов главного меню.
+        /// </summary>
         private void InitializeDefaultItems()
         {
             _items.Clear();
@@ -62,13 +119,24 @@ namespace FuryFront.Core.UI
             _items.Add(new MenuItem("exit", "Выход на рабочий стол"));
         }
 
-        // Переход на основной экран меню после титульного экрана.
+        /// <summary>
+        /// Переключает интерфейс с титульного экрана на основное меню.
+        /// </summary>
         public void ShowMainMenu()
         {
             CurrentScreen = MainMenuScreen.Main;
         }
 
-        // Обработка выбора пункта меню по идентификатору.
+        /// <summary>
+        /// Обрабатывает выбор пункта меню по его идентификатору.
+        /// </summary>
+        /// <param name="itemId">Идентификатор выбранного пункта меню.</param>
+        /// <exception cref="ArgumentException">
+        /// Выбрасывается, если идентификатор пустой или состоит только из пробелов.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если пункт не найден или недоступен для выбора.
+        /// </exception>
         public void SelectItem(string itemId)
         {
             if (string.IsNullOrWhiteSpace(itemId))
