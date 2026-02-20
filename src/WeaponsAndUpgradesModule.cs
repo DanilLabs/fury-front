@@ -3,163 +3,201 @@ using System.Collections.Generic;
 
 namespace FuryFront.Core.Combat
 {
-    // Тип оружия.
+    /// <summary>
+    /// Тип оружия.
+    /// </summary>
     public enum WeaponType
     {
-        AssaultRifle,
-        SniperRifle,
-        Shotgun,
+        /// <summary>
+        /// Пистолет.
+        /// </summary>
         Pistol,
-        SubmachineGun
+
+        /// <summary>
+        /// Штурмовая винтовка.
+        /// </summary>
+        Rifle,
+
+        /// <summary>
+        /// Пулемёт.
+        /// </summary>
+        MachineGun,
+
+        /// <summary>
+        /// Снайперская винтовка.
+        /// </summary>
+        SniperRifle
     }
 
-    // Редкость улучшения.
-    public enum UpgradeRarity
-    {
-        Common,
-        Rare,
-        Epic,
-        Legendary
-    }
-
-    // Базовое описание оружия.
+    /// <summary>
+    /// Описание оружия игрока.
+    /// </summary>
     public class Weapon
     {
+        /// <summary>
+        /// Уникальный идентификатор оружия.
+        /// </summary>
         public string Id { get; }
-        public string Name { get; }
-        public WeaponType Type { get; }
-        public int BaseDamage { get; }
-        public float FireRate { get; } // выстрелов в секунду
-        public int MagazineSize { get; }
 
-        public Weapon(string id, string name, WeaponType type, int baseDamage, float fireRate, int magazineSize)
+        /// <summary>
+        /// Отображаемое название оружия.
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Тип оружия.
+        /// </summary>
+        public WeaponType Type { get; }
+
+        /// <summary>
+        /// Базовый урон от одного выстрела.
+        /// </summary>
+        public int Damage { get; set; }
+
+        /// <summary>
+        /// Вместимость магазина.
+        /// </summary>
+        public int ClipSize { get; set; }
+
+        /// <summary>
+        /// Скорострельность (выстрелов в минуту).
+        /// </summary>
+        public int RateOfFire { get; set; }
+
+        /// <summary>
+        /// Создаёт новый экземпляр оружия.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор.</param>
+        /// <param name="name">Название оружия.</param>
+        /// <param name="type">Тип оружия.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="id"/> или <paramref name="name"/> равны null.
+        /// </exception>
+        public Weapon(string id, string name, WeaponType type)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Type = type;
-            BaseDamage = baseDamage;
-            FireRate = fireRate;
-            MagazineSize = magazineSize;
         }
     }
 
-    // Описание установленного улучшения.
+    /// <summary>
+    /// Улучшение оружия (модернизация).
+    /// </summary>
     public class WeaponUpgrade
     {
+        /// <summary>
+        /// Уникальный идентификатор улучшения.
+        /// </summary>
         public string Id { get; }
-        public string Name { get; }
-        public UpgradeRarity Rarity { get; }
-        public int DamageBonus { get; }
-        public float FireRateBonus { get; }
 
-        public WeaponUpgrade(string id, string name, UpgradeRarity rarity, int damageBonus, float fireRateBonus)
+        /// <summary>
+        /// Отображаемое название улучшения.
+        /// </summary>
+        public string Title { get; }
+
+        /// <summary>
+        /// Прибавка к урону.
+        /// </summary>
+        public int DamageBonus { get; set; }
+
+        /// <summary>
+        /// Прибавка к ёмкости магазина.
+        /// </summary>
+        public int ClipSizeBonus { get; set; }
+
+        /// <summary>
+        /// Создаёт новое улучшение оружия.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор улучшения.</param>
+        /// <param name="title">Название улучшения.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="id"/> или <paramref name="title"/> равны null.
+        /// </exception>
+        public WeaponUpgrade(string id, string title)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Rarity = rarity;
-            DamageBonus = damageBonus;
-            FireRateBonus = fireRateBonus;
+            Title = title ?? throw new ArgumentNullException(nameof(title));
         }
     }
 
-    // Экземпляр оружия с установленными улучшениями.
-    public class EquippedWeapon
+    /// <summary>
+    /// Модуль вооружения и улучшений.
+    /// </summary>
+    public class WeaponsAndUpgradesModule
     {
-        public Weapon BaseWeapon { get; }
-        public IReadOnlyList<WeaponUpgrade> Upgrades => _upgrades.AsReadOnly();
+        /// <summary>
+        /// Текущее активное оружие игрока.
+        /// </summary>
+        public Weapon CurrentWeapon { get; private set; }
 
-        private readonly List<WeaponUpgrade> _upgrades = new List<WeaponUpgrade>();
+        /// <summary>
+        /// Список доступного игроку оружия.
+        /// </summary>
+        public IReadOnlyList<Weapon> Weapons => _weapons.AsReadOnly();
 
-        public EquippedWeapon(Weapon baseWeapon)
+        private readonly List<Weapon> _weapons = new List<Weapon>();
+
+        /// <summary>
+        /// Добавляет оружие в инвентарь игрока.
+        /// </summary>
+        /// <param name="weapon">Экземпляр оружия.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="weapon"/> равен null.
+        /// </exception>
+        public void AddWeapon(Weapon weapon)
         {
-            BaseWeapon = baseWeapon ?? throw new ArgumentNullException(nameof(baseWeapon));
+            if (weapon == null)
+                throw new ArgumentNullException(nameof(weapon));
+
+            _weapons.Add(weapon);
+
+            if (CurrentWeapon == null)
+                CurrentWeapon = weapon;
         }
 
-        // Добавить улучшение к оружию.
-        public void AddUpgrade(WeaponUpgrade upgrade)
+        /// <summary>
+        /// Устанавливает активное оружие по идентификатору.
+        /// </summary>
+        /// <param name="weaponId">Идентификатор оружия.</param>
+        /// <exception cref="ArgumentException">
+        /// Выбрасывается, если идентификатор пустой.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если оружие с таким идентификатором не найдено.
+        /// </exception>
+        public void EquipWeapon(string weaponId)
+        {
+            if (string.IsNullOrWhiteSpace(weaponId))
+                throw new ArgumentException("Идентификатор оружия не может быть пустым.", nameof(weaponId));
+
+            var weapon = _weapons.Find(w => w.Id == weaponId);
+            if (weapon == null)
+                throw new InvalidOperationException($"Оружие с идентификатором \"{weaponId}\" не найдено.");
+
+            CurrentWeapon = weapon;
+        }
+
+        /// <summary>
+        /// Применяет улучшение к текущему оружию.
+        /// </summary>
+        /// <param name="upgrade">Улучшение, которое необходимо применить.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="upgrade"/> равен null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если активное оружие не задано.
+        /// </exception>
+        public void ApplyUpgrade(WeaponUpgrade upgrade)
         {
             if (upgrade == null)
                 throw new ArgumentNullException(nameof(upgrade));
 
-            _upgrades.Add(upgrade);
-        }
+            if (CurrentWeapon == null)
+                throw new InvalidOperationException("Активное оружие не задано.");
 
-        // Рассчитать итоговый урон с учётом улучшений.
-        public int GetTotalDamage()
-        {
-            int total = BaseWeapon.BaseDamage;
-            foreach (var upgrade in _upgrades)
-            {
-                total += upgrade.DamageBonus;
-            }
-            return total;
-        }
-
-        // Рассчитать итоговую скорострельность.
-        public float GetTotalFireRate()
-        {
-            float total = BaseWeapon.FireRate;
-            foreach (var upgrade in _upgrades)
-            {
-                total += upgrade.FireRateBonus;
-            }
-            return total;
-        }
-    }
-
-    // Модуль вооружения и улучшений.
-    public class WeaponsAndUpgradesModule
-    {
-        // Доступный арсенал оружия.
-        public IReadOnlyDictionary<string, Weapon> Arsenal => _arsenal;
-
-        private readonly Dictionary<string, Weapon> _arsenal = new Dictionary<string, Weapon>();
-
-        public WeaponsAndUpgradesModule()
-        {
-            InitializeDefaultArsenal();
-        }
-
-        // Инициализация базового набора оружия.
-        private void InitializeDefaultArsenal()
-        {
-            _arsenal.Clear();
-
-            _arsenal["rifle_ak"] = new Weapon(
-                "rifle_ak",
-                "Штурмовая винтовка АК",
-                WeaponType.AssaultRifle,
-                baseDamage: 30,
-                fireRate: 9.0f,
-                magazineSize: 30);
-
-            _arsenal["pistol_std"] = new Weapon(
-                "pistol_std",
-                "Служебный пистолет",
-                WeaponType.Pistol,
-                baseDamage: 20,
-                fireRate: 4.0f,
-                magazineSize: 15);
-
-            _arsenal["shotgun_pump"] = new Weapon(
-                "shotgun_pump",
-                "Помповый дробовик",
-                WeaponType.Shotgun,
-                baseDamage: 80,
-                fireRate: 1.0f,
-                magazineSize: 8);
-        }
-
-        // Получить оружие по идентификатору.
-        public Weapon GetWeapon(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-                throw new ArgumentException("Идентификатор оружия не может быть пустым.", nameof(id));
-
-            if (!_arsenal.TryGetValue(id, out var weapon))
-                throw new InvalidOperationException($"Оружие с идентификатором \"{id}\" не найдено в арсенале.");
-
-            return weapon;
+            CurrentWeapon.Damage += upgrade.DamageBonus;
+            CurrentWeapon.ClipSize += upgrade.ClipSizeBonus;
         }
     }
 }
