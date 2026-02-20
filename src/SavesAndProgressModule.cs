@@ -3,24 +3,50 @@ using System.Collections.Generic;
 
 namespace FuryFront.Core.Campaign
 {
-    // Снимок сохранения кампании.
+    /// <summary>
+    /// Снимок сохранения кампании.
+    /// </summary>
     public class CampaignSaveSnapshot
     {
-        // Уникальный идентификатор сохранения.
+        /// <summary>
+        /// Уникальный идентификатор сохранения.
+        /// </summary>
         public string Id { get; }
 
-        // Название сохранения, отображаемое игроку.
+        /// <summary>
+        /// Название сохранения, отображаемое игроку.
+        /// </summary>
         public string Title { get; }
 
-        // Имя текущей миссии.
+        /// <summary>
+        /// Идентификатор текущей миссии.
+        /// </summary>
         public string CurrentMissionId { get; }
 
-        // Время создания сохранения.
+        /// <summary>
+        /// Время создания сохранения (UTC).
+        /// </summary>
         public DateTime CreatedAt { get; }
 
-        // Прогресс кампании в процентах.
+        /// <summary>
+        /// Прогресс кампании в процентах (0..100).
+        /// </summary>
         public int ProgressPercent { get; }
 
+        /// <summary>
+        /// Создаёт снимок сохранения кампании.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор сохранения.</param>
+        /// <param name="title">Название сохранения.</param>
+        /// <param name="currentMissionId">Идентификатор текущей миссии.</param>
+        /// <param name="createdAt">Момент создания сохранения.</param>
+        /// <param name="progressPercent">Прогресс кампании в процентах.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если один из строковых параметров равен null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Выбрасывается, если прогресс вне диапазона 0..100.
+        /// </exception>
         public CampaignSaveSnapshot(
             string id,
             string title,
@@ -40,15 +66,28 @@ namespace FuryFront.Core.Campaign
         }
     }
 
-    // Модуль сохранений и прогресса кампании.
+    /// <summary>
+    /// Модуль сохранений и прогресса кампании.
+    /// </summary>
     public class SavesAndProgressModule
     {
-        // Список доступных сохранений.
+        /// <summary>
+        /// Список доступных сохранений.
+        /// </summary>
         public IReadOnlyList<CampaignSaveSnapshot> Saves => _saves.AsReadOnly();
 
         private readonly List<CampaignSaveSnapshot> _saves = new List<CampaignSaveSnapshot>();
 
-        // Создать новое сохранение кампании.
+        /// <summary>
+        /// Создаёт новое сохранение кампании.
+        /// </summary>
+        /// <param name="title">Название сохранения.</param>
+        /// <param name="currentMissionId">Идентификатор текущей миссии.</param>
+        /// <param name="progressPercent">Прогресс кампании в процентах.</param>
+        /// <returns>Созданный снимок сохранения.</returns>
+        /// <exception cref="ArgumentException">
+        /// Выбрасывается, если строковые параметры пустые.
+        /// </exception>
         public CampaignSaveSnapshot CreateSave(string title, string currentMissionId, int progressPercent)
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -69,7 +108,17 @@ namespace FuryFront.Core.Campaign
             return snapshot;
         }
 
-        // Получить сохранение по идентификатору.
+        /// <summary>
+        /// Возвращает сохранение по идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор сохранения.</param>
+        /// <returns>Найденный снимок сохранения.</returns>
+        /// <exception cref="ArgumentException">
+        /// Выбрасывается, если идентификатор пустой.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если сохранение с указанным идентификатором не найдено.
+        /// </exception>
         public CampaignSaveSnapshot GetSave(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -82,7 +131,13 @@ namespace FuryFront.Core.Campaign
             return save;
         }
 
-        // Удалить сохранение по идентификатору.
+        /// <summary>
+        /// Удаляет сохранение по идентификатору, если оно существует.
+        /// </summary>
+        /// <param name="id">Идентификатор сохранения.</param>
+        /// <exception cref="ArgumentException">
+        /// Выбрасывается, если идентификатор пустой.
+        /// </exception>
         public void DeleteSave(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
