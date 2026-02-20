@@ -3,38 +3,102 @@ using System.Collections.Generic;
 
 namespace FuryFront.Core.Combat
 {
-    // Поведение бота в бою.
+    /// <summary>
+    /// Поведение бота в бою.
+    /// </summary>
     public enum AiBehavior
     {
+        /// <summary>
+        /// Пассивное поведение, бот избегает боя.
+        /// </summary>
         Passive,
+
+        /// <summary>
+        /// Оборонительное поведение, бот избегает лишнего риска.
+        /// </summary>
         Defensive,
+
+        /// <summary>
+        /// Агрессивное поведение, бот активно вступает в бой.
+        /// </summary>
         Aggressive
     }
 
-    // Текущая тактическая задача бота.
+    /// <summary>
+    /// Текущая тактическая задача бота.
+    /// </summary>
     public enum AiTask
     {
+        /// <summary>
+        /// Бездействие.
+        /// </summary>
         Idle,
+
+        /// <summary>
+        /// Патрулирование территории.
+        /// </summary>
         Patrol,
+
+        /// <summary>
+        /// Атака игрока.
+        /// </summary>
         AttackPlayer,
+
+        /// <summary>
+        /// Поиск укрытия.
+        /// </summary>
         TakeCover,
+
+        /// <summary>
+        /// Отступление.
+        /// </summary>
         Retreat
     }
 
-    // Параметры ИИ бойца.
+    /// <summary>
+    /// Параметры и текущее состояние ИИ‑бойца.
+    /// </summary>
     public class CombatAiAgent
     {
+        /// <summary>
+        /// Уникальный идентификатор агента.
+        /// </summary>
         public string Id { get; }
+
+        /// <summary>
+        /// Отображаемое имя агента.
+        /// </summary>
         public string DisplayName { get; }
+
+        /// <summary>
+        /// Базовое поведение ИИ.
+        /// </summary>
         public AiBehavior Behavior { get; private set; }
+
+        /// <summary>
+        /// Текущая тактическая задача.
+        /// </summary>
         public AiTask CurrentTask { get; private set; }
 
-        // Дистанция до игрока в метрах.
+        /// <summary>
+        /// Дистанция до игрока в метрах.
+        /// </summary>
         public float DistanceToPlayer { get; set; }
 
-        // Уровень угрозы игрока по оценке ИИ.
+        /// <summary>
+        /// Оценка уровня угрозы игрока.
+        /// </summary>
         public float ThreatLevel { get; set; }
 
+        /// <summary>
+        /// Создаёт нового ИИ‑агента с указанными параметрами.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор агента.</param>
+        /// <param name="displayName">Отображаемое имя агента.</param>
+        /// <param name="behavior">Базовое поведение ИИ.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="id"/> или <paramref name="displayName"/> равны null.
+        /// </exception>
         public CombatAiAgent(string id, string displayName, AiBehavior behavior)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
@@ -43,7 +107,9 @@ namespace FuryFront.Core.Combat
             CurrentTask = AiTask.Idle;
         }
 
-        // Обновить задачи бота на основе текущих параметров.
+        /// <summary>
+        /// Обновляет текущую задачу бота на основе дистанции и уровня угрозы.
+        /// </summary>
         public void UpdateDecision()
         {
             if (ThreatLevel <= 0.1f)
@@ -66,6 +132,9 @@ namespace FuryFront.Core.Combat
             }
         }
 
+        /// <summary>
+        /// Логика выбора задачи для пассивного поведения.
+        /// </summary>
         private void DecidePassive()
         {
             if (DistanceToPlayer < 5.0f)
@@ -78,6 +147,9 @@ namespace FuryFront.Core.Combat
             }
         }
 
+        /// <summary>
+        /// Логика выбора задачи для оборонительного поведения.
+        /// </summary>
         private void DecideDefensive()
         {
             if (DistanceToPlayer < 10.0f && ThreatLevel > 0.5f)
@@ -94,6 +166,9 @@ namespace FuryFront.Core.Combat
             }
         }
 
+        /// <summary>
+        /// Логика выбора задачи для агрессивного поведения.
+        /// </summary>
         private void DecideAggressive()
         {
             if (DistanceToPlayer < 20.0f)
@@ -107,15 +182,25 @@ namespace FuryFront.Core.Combat
         }
     }
 
-    // Модуль искусственного интеллекта противников и союзников.
+    /// <summary>
+    /// Модуль искусственного интеллекта противников и союзников.
+    /// </summary>
     public class CombatAIModule
     {
-        // Зарегистрированные агенты ИИ.
+        /// <summary>
+        /// Зарегистрированные агенты ИИ.
+        /// </summary>
         public IReadOnlyList<CombatAiAgent> Agents => _agents.AsReadOnly();
 
         private readonly List<CombatAiAgent> _agents = new List<CombatAiAgent>();
 
-        // Добавить нового ИИ-агента в систему.
+        /// <summary>
+        /// Регистрирует нового ИИ‑агента в системе.
+        /// </summary>
+        /// <param name="agent">Агент, которого необходимо добавить.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="agent"/> равен null.
+        /// </exception>
         public void RegisterAgent(CombatAiAgent agent)
         {
             if (agent == null)
@@ -124,7 +209,9 @@ namespace FuryFront.Core.Combat
             _agents.Add(agent);
         }
 
-        // Выполнить обновление решений для всех агентов.
+        /// <summary>
+        /// Обновляет решения для всех зарегистрированных ИИ‑агентов.
+        /// </summary>
         public void UpdateAllAgents()
         {
             foreach (var agent in _agents)
