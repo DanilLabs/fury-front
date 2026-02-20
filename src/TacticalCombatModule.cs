@@ -2,48 +2,97 @@ using System;
 
 namespace FuryFront.Core.Combat
 {
-    // Режим ведения огня.
+    /// <summary>
+    /// Режим ведения огня.
+    /// </summary>
     public enum FireMode
     {
+        /// <summary>
+        /// Одиночные выстрелы.
+        /// </summary>
         Single,
+
+        /// <summary>
+        /// Очередь из нескольких выстрелов.
+        /// </summary>
         Burst,
+
+        /// <summary>
+        /// Автоматический огонь.
+        /// </summary>
         Auto
     }
 
-    // Состояние боевого столкновения.
+    /// <summary>
+    /// Состояние боевого столкновения.
+    /// </summary>
     public enum CombatState
     {
+        /// <summary>
+        /// Бой не ведётся.
+        /// </summary>
         Idle,
+
+        /// <summary>
+        /// Игрок вовлечён в бой.
+        /// </summary>
         Engaged,
+
+        /// <summary>
+        /// Игрок находится в укрытии.
+        /// </summary>
         InCover,
+
+        /// <summary>
+        /// Игрок выполняет перезарядку.
+        /// </summary>
         Reloading
     }
 
-    // Параметры тактического боя для игрока.
+    /// <summary>
+    /// Параметры тактического боя для игрока.
+    /// </summary>
     public class TacticalCombatContext
     {
-        // Текущее количество здоровья.
+        /// <summary>
+        /// Текущее количество здоровья.
+        /// </summary>
         public int Health { get; set; }
 
-        // Текущее количество боеприпасов в магазине.
+        /// <summary>
+        /// Текущее количество боеприпасов в магазине.
+        /// </summary>
         public int AmmoInClip { get; set; }
 
-        // Общее количество боеприпасов.
+        /// <summary>
+        /// Общее количество боеприпасов.
+        /// </summary>
         public int ReserveAmmo { get; set; }
 
-        // Текущий режим огня.
+        /// <summary>
+        /// Текущий режим огня.
+        /// </summary>
         public FireMode FireMode { get; set; }
 
-        // Текущее состояние боя.
+        /// <summary>
+        /// Текущее состояние боя.
+        /// </summary>
         public CombatState State { get; set; }
     }
 
-    // Модуль системы свободного и тактического боя.
+    /// <summary>
+    /// Модуль системы свободного и тактического боя.
+    /// </summary>
     public class TacticalCombatModule
     {
-        // Текущее состояние боя игрока.
+        /// <summary>
+        /// Текущее состояние боя игрока.
+        /// </summary>
         public TacticalCombatContext Context { get; private set; }
 
+        /// <summary>
+        /// Создаёт модуль тактического боя и инициализирует базовый контекст.
+        /// </summary>
         public TacticalCombatModule()
         {
             Context = new TacticalCombatContext
@@ -56,7 +105,12 @@ namespace FuryFront.Core.Combat
             };
         }
 
-        // Начать боевой контакт.
+        /// <summary>
+        /// Переводит игрока в состояние активного боя.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если здоровье игрока равно нулю.
+        /// </exception>
         public void Engage()
         {
             if (Context.Health <= 0)
@@ -65,7 +119,12 @@ namespace FuryFront.Core.Combat
             Context.State = CombatState.Engaged;
         }
 
-        // Перейти в укрытие.
+        /// <summary>
+        /// Переводит игрока в укрытие.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если игрок не находится в активном бою.
+        /// </exception>
         public void TakeCover()
         {
             if (Context.State != CombatState.Engaged)
@@ -74,7 +133,12 @@ namespace FuryFront.Core.Combat
             Context.State = CombatState.InCover;
         }
 
-        // Выполнить выстрел.
+        /// <summary>
+        /// Выполняет выстрел из текущего оружия.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если игрок не в бою или магазин пуст.
+        /// </exception>
         public void Fire()
         {
             if (Context.State == CombatState.Idle)
@@ -91,7 +155,12 @@ namespace FuryFront.Core.Combat
             }
         }
 
-        // Перезарядить оружие.
+        /// <summary>
+        /// Перезаряжает оружие из запаса боеприпасов.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если нет боеприпасов для перезарядки.
+        /// </exception>
         public void Reload()
         {
             if (Context.ReserveAmmo <= 0)
@@ -108,7 +177,13 @@ namespace FuryFront.Core.Combat
             Context.State = CombatState.Engaged;
         }
 
-        // Получить урон игроком.
+        /// <summary>
+        /// Применяет к игроку входящий урон.
+        /// </summary>
+        /// <param name="amount">Величина урона.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Выбрасывается, если величина урона отрицательна.
+        /// </exception>
         public void ApplyDamage(int amount)
         {
             if (amount < 0)
