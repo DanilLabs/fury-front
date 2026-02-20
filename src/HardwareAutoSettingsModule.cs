@@ -2,44 +2,83 @@ using System;
 
 namespace FuryFront.Core.Settings
 {
-    // Профиль графических настроек игры.
+    /// <summary>
+    /// Профиль графических настроек игры.
+    /// </summary>
     public class GraphicsProfile
     {
-        // Название профиля (Low, Medium, High, Ultra).
+        /// <summary>
+        /// Название профиля (Low, Medium, High, Ultra).
+        /// </summary>
         public string Name { get; set; }
 
-        // Целевое значение FPS.
+        /// <summary>
+        /// Целевое значение кадров в секунду (FPS).
+        /// </summary>
         public int TargetFps { get; set; }
 
-        // Уровень качества текстур (0..3).
+        /// <summary>
+        /// Уровень качества текстур (0..3).
+        /// </summary>
         public int TextureQuality { get; set; }
 
-        // Уровень качества теней (0..3).
+        /// <summary>
+        /// Уровень качества теней (0..3).
+        /// </summary>
         public int ShadowQuality { get; set; }
 
-        // Включено ли сглаживание.
+        /// <summary>
+        /// Признак включения сглаживания.
+        /// </summary>
         public bool AntiAliasingEnabled { get; set; }
     }
 
-    // Результат анализа оборудования игрока.
+    /// <summary>
+    /// Данные об аппаратной конфигурации игрока.
+    /// </summary>
     public class HardwareInfo
     {
+        /// <summary>
+        /// Модель центрального процессора.
+        /// </summary>
         public string CpuModel { get; set; }
+
+        /// <summary>
+        /// Модель графического адаптера.
+        /// </summary>
         public string GpuModel { get; set; }
+
+        /// <summary>
+        /// Объём оперативной памяти, ГБ.
+        /// </summary>
         public int RamGb { get; set; }
+
+        /// <summary>
+        /// Объём видеопамяти, ГБ.
+        /// </summary>
         public int VramGb { get; set; }
     }
 
-    // Модуль анализа оборудования и автоподстройки параметров.
+    /// <summary>
+    /// Модуль анализа оборудования и автоподстройки графических параметров.
+    /// </summary>
     public class HardwareAutoSettingsModule
     {
-        // Текущие данные об оборудовании.
+        /// <summary>
+        /// Текущие данные об оборудовании игрока.
+        /// Заполняются после вызова <see cref="AnalyzeHardware"/>.
+        /// </summary>
         public HardwareInfo CurrentHardware { get; private set; }
 
-        // Рекомендованный профиль графики.
+        /// <summary>
+        /// Рекомендованный профиль графики на основе текущего оборудования.
+        /// </summary>
         public GraphicsProfile RecommendedProfile { get; private set; }
 
-        // Анализ аппаратной конфигурации игрока.
+        /// <summary>
+        /// Выполняет анализ аппаратной конфигурации игрока
+        /// и заполняет структуру <see cref="CurrentHardware"/>.
+        /// </summary>
         public void AnalyzeHardware()
         {
             // Определение параметров оборудования игрока.
@@ -52,7 +91,13 @@ namespace FuryFront.Core.Settings
             };
         }
 
-        // Подбор графического профиля на основе анализа.
+        /// <summary>
+        /// Подбирает и сохраняет в <see cref="RecommendedProfile"/> графический
+        /// профиль, соответствующий текущему оборудованию.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если оборудование ещё не было проанализировано.
+        /// </exception>
         public void ApplyRecommendedSettings()
         {
             if (CurrentHardware == null)
