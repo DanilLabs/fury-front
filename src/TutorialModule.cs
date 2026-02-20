@@ -3,41 +3,67 @@ using System.Collections.Generic;
 
 namespace FuryFront.Core.Tutorial
 {
-    // Этап обучения, через который проходит игрок.
+    /// <summary>
+    /// Отдельный шаг обучения игрока.
+    /// </summary>
     public class TutorialStep
     {
-        // Уникальный идентификатор шага.
+        /// <summary>
+        /// Уникальный идентификатор шага.
+        /// </summary>
         public string Id { get; }
 
-        // Текст инструкции для игрока.
+        /// <summary>
+        /// Текст инструкции для игрока.
+        /// </summary>
         public string Instruction { get; }
 
-        // Флаг, выполнен ли шаг.
+        /// <summary>
+        /// Признак того, что шаг обучения выполнен.
+        /// </summary>
         public bool IsCompleted { get; private set; }
 
+        /// <summary>
+        /// Создаёт новый шаг обучения.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор шага.</param>
+        /// <param name="instruction">Текст подсказки для игрока.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если <paramref name="id"/> или <paramref name="instruction"/> равны null.
+        /// </exception>
         public TutorialStep(string id, string instruction)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
             Instruction = instruction ?? throw new ArgumentNullException(nameof(instruction));
         }
 
-        // Отметить текущий шаг как выполненный.
+        /// <summary>
+        /// Отмечает шаг обучения как выполненный.
+        /// </summary>
         public void Complete()
         {
             IsCompleted = true;
         }
     }
 
-    // Модуль начальной миссии и обучения управлению.
+    /// <summary>
+    /// Модуль начальной миссии и обучения управлению.
+    /// </summary>
     public class TutorialModule
     {
-        // Список шагов обучения.
+        /// <summary>
+        /// Список шагов обучения игрока.
+        /// </summary>
         public IReadOnlyList<TutorialStep> Steps => _steps.AsReadOnly();
 
-        // Индекс текущего шага.
+        /// <summary>
+        /// Индекс текущего шага обучения.
+        /// </summary>
         public int CurrentStepIndex { get; private set; } = -1;
 
-        // Текущий активный шаг обучения.
+        /// <summary>
+        /// Текущий активный шаг обучения или null, если обучение не запущено.
+        /// </summary>
         public TutorialStep CurrentStep =>
             (CurrentStepIndex >= 0 && CurrentStepIndex < _steps.Count)
                 ? _steps[CurrentStepIndex]
@@ -45,12 +71,17 @@ namespace FuryFront.Core.Tutorial
 
         private readonly List<TutorialStep> _steps = new List<TutorialStep>();
 
+        /// <summary>
+        /// Создаёт модуль обучения и инициализирует стандартную последовательность шагов.
+        /// </summary>
         public TutorialModule()
         {
             InitializeDefaultSteps();
         }
 
-        // Инициализация базовой последовательности шагов обучения.
+        /// <summary>
+        /// Инициализирует базовый набор шагов обучения управлению.
+        /// </summary>
         private void InitializeDefaultSteps()
         {
             _steps.Clear();
@@ -61,7 +92,12 @@ namespace FuryFront.Core.Tutorial
             _steps.Add(new TutorialStep("grenade", "Бросьте гранату по группе целей."));
         }
 
-        // Запуск обучения с первого шага.
+        /// <summary>
+        /// Запускает обучение с первого шага.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если список шагов не инициализирован.
+        /// </exception>
         public void StartTutorial()
         {
             if (_steps.Count == 0)
@@ -70,7 +106,12 @@ namespace FuryFront.Core.Tutorial
             CurrentStepIndex = 0;
         }
 
-        // Отметить текущий шаг выполненным и перейти к следующему.
+        /// <summary>
+        /// Отмечает текущий шаг выполненным и переходит к следующему.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если обучение ещё не запущено.
+        /// </exception>
         public void CompleteCurrentStep()
         {
             if (CurrentStep == null)
