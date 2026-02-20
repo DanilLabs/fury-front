@@ -3,30 +3,66 @@ using System.Collections.Generic;
 
 namespace FuryFront.Core.Campaign
 {
-    // Состояние основной миссии кампании.
+    /// <summary>
+    /// Состояние основной миссии кампании.
+    /// </summary>
     public enum MissionState
     {
+        /// <summary>
+        /// Миссия ещё не запускалась.
+        /// </summary>
         NotStarted,
+
+        /// <summary>
+        /// Миссия выполняется.
+        /// </summary>
         InProgress,
+
+        /// <summary>
+        /// Миссия успешно завершена.
+        /// </summary>
         Completed,
+
+        /// <summary>
+        /// Миссия провалена.
+        /// </summary>
         Failed
     }
 
-    // Описание основной миссии.
+    /// <summary>
+    /// Описание основной миссии кампании.
+    /// </summary>
     public class CampaignMission
     {
-        // Уникальный идентификатор миссии.
+        /// <summary>
+        /// Уникальный идентификатор миссии.
+        /// </summary>
         public string Id { get; }
 
-        // Отображаемое название миссии.
+        /// <summary>
+        /// Название миссии, отображаемое игроку.
+        /// </summary>
         public string Title { get; }
 
-        // Краткое описание задачи.
+        /// <summary>
+        /// Краткое текстовое описание задания.
+        /// </summary>
         public string Description { get; }
 
-        // Текущее состояние миссии.
+        /// <summary>
+        /// Текущее состояние миссии.
+        /// </summary>
         public MissionState State { get; private set; } = MissionState.NotStarted;
 
+        /// <summary>
+        /// Создаёт новую миссию кампании.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор миссии.</param>
+        /// <param name="title">Название миссии.</param>
+        /// <param name="description">Краткое описание цели.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если один из параметров равен null.
+        /// </exception>
         public CampaignMission(string id, string title, string description)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
@@ -34,7 +70,12 @@ namespace FuryFront.Core.Campaign
             Description = description ?? throw new ArgumentNullException(nameof(description));
         }
 
-        // Запуск миссии.
+        /// <summary>
+        /// Запускает миссию.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если миссия уже была запущена.
+        /// </exception>
         public void Start()
         {
             if (State != MissionState.NotStarted)
@@ -43,7 +84,12 @@ namespace FuryFront.Core.Campaign
             State = MissionState.InProgress;
         }
 
-        // Завершение миссии с успехом.
+        /// <summary>
+        /// Отмечает миссию как успешно завершённую.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если миссия не находится в состоянии InProgress.
+        /// </exception>
         public void Complete()
         {
             if (State != MissionState.InProgress)
@@ -52,7 +98,12 @@ namespace FuryFront.Core.Campaign
             State = MissionState.Completed;
         }
 
-        // Провал миссии.
+        /// <summary>
+        /// Отмечает миссию как проваленную.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если миссия не находится в состоянии InProgress.
+        /// </exception>
         public void Fail()
         {
             if (State != MissionState.InProgress)
@@ -62,18 +113,33 @@ namespace FuryFront.Core.Campaign
         }
     }
 
-    // Модуль игрового процесса основной кампании (типовой уровень).
+    /// <summary>
+    /// Модуль игрового процесса основной кампании (типовой уровень).
+    /// </summary>
     public class CampaignCoreModule
     {
-        // Текущая активная миссия кампании.
+        /// <summary>
+        /// Текущая активная миссия кампании.
+        /// </summary>
         public CampaignMission CurrentMission { get; private set; }
 
-        // История завершённых миссий.
+        /// <summary>
+        /// Список завершённых миссий кампании.
+        /// </summary>
         public IReadOnlyList<CampaignMission> CompletedMissions => _completedMissions.AsReadOnly();
 
         private readonly List<CampaignMission> _completedMissions = new List<CampaignMission>();
 
-        // Запуск новой миссии кампании.
+        /// <summary>
+        /// Запускает новую миссию кампании.
+        /// </summary>
+        /// <param name="mission">Миссия, которую необходимо запустить.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Выбрасывается, если параметр <paramref name="mission"/> равен null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если другая миссия уже выполняется.
+        /// </exception>
         public void StartMission(CampaignMission mission)
         {
             if (mission == null)
@@ -86,7 +152,12 @@ namespace FuryFront.Core.Campaign
             CurrentMission.Start();
         }
 
-        // Отметить текущую миссию как успешно выполненную.
+        /// <summary>
+        /// Отмечает текущую миссию как успешно выполненную и добавляет её в историю.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если текущая миссия не задана.
+        /// </exception>
         public void CompleteCurrentMission()
         {
             if (CurrentMission == null)
@@ -97,7 +168,12 @@ namespace FuryFront.Core.Campaign
             CurrentMission = null;
         }
 
-        // Отметить текущую миссию как проваленную.
+        /// <summary>
+        /// Отмечает текущую миссию как проваленную.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Выбрасывается, если текущая миссия не задана.
+        /// </exception>
         public void FailCurrentMission()
         {
             if (CurrentMission == null)
