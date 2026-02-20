@@ -2,125 +2,135 @@ using System;
 
 namespace FuryFront.Core.Combat
 {
-    // Тип источника урона.
-    public enum DamageType
+    /// <summary>
+    /// Состояние здоровья и брони игрока.
+    /// </summary>
+    public class HealthAndArmorState
     {
-        Bullet,
-        Explosion,
-        Melee,
-        Environmental
+        /// <summary>
+        /// Текущее количество очков здоровья.
+        /// </summary>
+        public int Health { get; set; }
+
+        /// <summary>
+        /// Текущее количество очков брони.
+        /// </summary>
+        public int Armor { get; set; }
+
+        /// <summary>
+        /// Максимальное количество очков здоровья.
+        /// </summary>
+        public int MaxHealth { get; set; } = 100;
+
+        /// <summary>
+        /// Максимальное количество очков брони.
+        /// </summary>
+        public int MaxArmor { get; set; } = 100;
+
+        /// <summary>
+        /// Признак того, что игрок жив.
+        /// </summary>
+        public bool IsAlive => Health > 0;
     }
 
-    // Параметры защиты игрока.
-    public class DefenseStats
-    {
-        // Максимальное значение здоровья.
-        public int MaxHealth { get; set; }
-
-        // Максимальное значение брони.
-        public int MaxArmor { get; set; }
-
-        // Текущее здоровье.
-        public int CurrentHealth { get; set; }
-
-        // Текущая броня.
-        public int CurrentArmor { get; set; }
-
-        // Множитель урона по здоровью без брони.
-        public float HealthDamageMultiplier { get; set; } = 1.0f;
-    }
-
-    // Модуль системы здоровья, брони и повреждений.
+    /// <summary>
+    /// Модуль системы здоровья, брони и повреждений.
+    /// </summary>
     public class HealthAndArmorModule
     {
-        // Текущие параметры защиты игрока.
-        public DefenseStats Stats { get; private set; }
+        /// <summary>
+        /// Текущее состояние здоровья и брони игрока.
+        /// </summary>
+        public HealthAndArmorState State { get; }
 
-        public bool IsAlive => Stats.CurrentHealth > 0;
-
+        /// <summary>
+        /// Создаёт модуль здоровья и брони с начальными значениями.
+        /// </summary>
         public HealthAndArmorModule()
         {
-            Stats = new DefenseStats
+            State = new HealthAndArmorState
             {
-                MaxHealth = 100,
-                MaxArmor = 50,
-                CurrentHealth = 100,
-                CurrentArmor = 50,
-                HealthDamageMultiplier = 1.0f
+                Health = 100,
+                Armor = 50
             };
         }
 
-        // Применить урон к игроку с учётом брони.
-        public void ApplyDamage(int amount, DamageType type)
+        /// <summary>
+        /// Применяет входящий урон к игроку.
+        /// Сначала урон поглощается бронёй, затем здоровьем.
+        /// </summary>
+        /// <param name="amount">Величина урона.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Выбрасывается, если величина урона отрицательна.
+        /// </exception>
+        public void ApplyDamage(int amount)
         {
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Урон не может быть отрицательным.");
 
-            if (!IsAlive)
+            if (!State.IsAlive)
                 return;
 
-            int remainingDamage = amount;
-
-            // Сначала снимаем урон с брони.
-            if (Stats.CurrentArmor > 0)
-            {
-                int armorDamage = Math.Min(Stats.CurrentArmor, remainingDamage);
-                Stats.CurrentArmor -= armorDamage;
-                remainingDamage -= armorDamage;
-            }
+            // Сначала поглощаем урон бронёй.
+            int armorDamage = Math.Min(State.Armor, amount);
+            State.Armor -= armorDamage;
+            amount -= armorDamage;
 
             // Оставшийся урон уходит в здоровье.
-            if (remainingDamage > 0)
+            if (amount > 0)
             {
-                float multiplier = GetDamageMultiplier(type);
-                int healthDamage = (int)(remainingDamage * multiplier);
-
-                Stats.CurrentHealth -= healthDamage;
-                if (Stats.CurrentHealth < 0)
-                    Stats.CurrentHealth = 0;
+                State.Health -= amount;
+                if (State.Health < 0)
+                    State.Health = 0;
             }
         }
 
-        // Восстановление здоровья до указанного значения.
+        /// <summary>
+        /// Восстанавливает здоровье игрока на указанную величину.
+        /// </summary>
+        /// <param name="amount">Величина восстановления.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Выбрасывается, если величина восстановления отрицательна.
+        /// </exception>
         public void Heal(int amount)
         {
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Восстановление не может быть отрицательным.");
 
-            if (!IsAlive)
+            if (!State.IsAlive)
                 return;
 
-            Stats.CurrentHealth += amount;
-            if (Stats.CurrentHealth > Stats.MaxHealth)
-                Stats.CurrentHealth = Stats.MaxHealth;
+            State.Health += amount;
+            if (State.Health > State.MaxHealth)
+                State.Health = State.MaxHealth;
         }
 
-        // Восстановление брони до указанного значения.
+        /// <summary>
+        /// Восстанавливает броню игрока на указанную величину.
+        /// </summary>
+        /// <param name="amount">Величина восстановления брони.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Выбрасывается, если величина восстановления отрицательна.
+        /// </exception>
         public void RestoreArmor(int amount)
         {
             if (amount < 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Восстановление брони не может быть отрицательным.");
 
-            Stats.CurrentArmor += amount;
-            if (Stats.CurrentArmor > Stats.MaxArmor)
-                Stats.CurrentArmor = Stats.MaxArmor;
+            if (!State.IsAlive)
+                return;
+
+            State.Armor += amount;
+            if (State.Armor > State.MaxArmor)
+                State.Armor = State.MaxArmor;
         }
 
-        // Получить множитель урона в зависимости от типа.
-        private float GetDamageMultiplier(DamageType type)
+        /// <summary>
+        /// Полностью убивает игрока, устанавливая здоровье в ноль.
+        /// </summary>
+        public void Kill()
         {
-            switch (type)
-            {
-                case DamageType.Explosion:
-                    return 1.3f;
-                case DamageType.Melee:
-                    return 1.1f;
-                case DamageType.Environmental:
-                    return 0.8f;
-                case DamageType.Bullet:
-                default:
-                    return 1.0f;
-            }
+            State.Health = 0;
         }
     }
 }
