@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book xmlns="http://docbook.org/ns/docbook" version="5.0">
+  <title>Фронт ярости: руководство для разработчиков</title>
+
+  <chapter xml:id="intro">
+    <title>Общее описание проекта</title>
+
+    <para>
+      «Фронт ярости» — тактический шутер от первого лица, действие которого разворачивается
+      в альтернативной версии Второй мировой войны. Игрок управляет бойцом элитного
+      подразделения, выполняющим диверсионные операции в тылу противника.
+    </para>
+
+    <para>
+      Основной акцент делается на сочетании быстрых перестрелок и осмысленного тактического
+      геймплея. Игроку необходимо учитывать расположение укрытий, линии обзора, уровень шума
+      и состояние отряда, чтобы успешно проходить миссии и избегать лишних столкновений.
+    </para>
+
+    <para>
+      Архитектура проекта построена в виде набора независимых модулей, каждый из которых
+      отвечает за отдельный аспект игры: автоматическую подстройку графики под оборудование
+      игрока, систему обучения, кампанию и миссии, боевую систему, сохранения прогресса,
+      пользовательский интерфейс, звук и локализацию. Такая модульная структура упрощает
+      сопровождение и расширение функциональности.
+    </para>
+
+    <para>
+      Исходный код снабжён XML‑докблоками языка C#, что позволяет автоматически
+      генерировать справочное руководство для программистов. Документация описывает
+      назначение классов, их свойств и методов, а также возможные исключения и взаимодействие
+      между компонентами игрового ядра.
+    </para>
+
+    <para>
+      Настоящее руководство предназначено для разработчиков, которые поддерживают и развивают
+      проект «Фронт ярости». В нём приводится обзор ключевых модулей, а также примеры
+      типичных сценариев использования API, связанных с настройкой графики, обработкой урона,
+      управлением сохранениями прогресса кампании и отображением состояния игрока в интерфейсе.
+    </para>
+  </chapter>
+
+  <chapter xml:id="scenarios">
+    <title>Сценарии использования модулей</title>
+
+    <section xml:id="modules-overview">
+      <title>Обзор модулей проекта</title>
+      <para>
+        Архитектура проекта «Фронт ярости» разделена на четыре логические группы модулей:
+        системные настройки, боевая система, прогресс кампании и представление (интерфейс и звук).
+      </para>
+
+      <itemizedlist>
+        <listitem>
+          <para><emphasis>Группа системных настроек</emphasis></para>
+          <itemizedlist>
+            <listitem><para>HardwareAutoSettingsModule – автоматическая подстройка графики под оборудование игрока.</para></listitem>
+            <listitem><para>MainMenuModule – главное меню и навигация по игровым режимам.</para></listitem>
+            <listitem><para>TutorialModule – система обучения и подсказок для новых игроков.</para></listitem>
+            <listitem><para>CampaignCoreModule – ядро кампании и базовое управление миссиями.</para></listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Группа боевой системы</emphasis></para>
+          <itemizedlist>
+            <listitem><para>TacticalCombatModule – тактическая боевая система и управление боевыми столкновениями.</para></listitem>
+            <listitem><para>WeaponsAndUpgradesModule – оружие, модификации и улучшения.</para></listitem>
+            <listitem><para>HealthAndArmorModule – здоровье, броня и обработка урона.</para></listitem>
+            <listitem><para>CombatAIModule – искусственный интеллект противников и союзников.</para></listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Группа прогресса кампании</emphasis></para>
+          <itemizedlist>
+            <listitem><para>MissionsAndObjectivesModule – сценарии, миссии и цели.</para></listitem>
+            <listitem><para>SavesAndProgressModule – система сохранений и отслеживания прогресса кампании.</para></listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>Группа представления и звука</emphasis></para>
+          <itemizedlist>
+            <listitem><para>HudModule – пользовательский интерфейс и HUD игрока.</para></listitem>
+            <listitem><para>AudioAndLocalizationModule – звук, музыка и локализация.</para></listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section xml:id="scenario-auto-settings">
+      <title>Автонастройка графики под систему игрока</title>
+      <para>
+        В данном сценарии модуль HardwareAutoSettingsModule анализирует оборудование
+        игрока и подбирает подходящий профиль графики. Это позволяет автоматически
+        установить рекомендуемые настройки качества изображения и целевой FPS,
+        не заставляя пользователя разбираться в множестве параметров.
+      </para>
+      <programlisting language="csharp"><![CDATA[
+public void ApplyRecommendedSettings()
+{
+    if (CurrentHardware == null)
+        throw new InvalidOperationException("Оборудование ещё не было проанализировано.");
+
+    // Упрощённая логика выбора профиля.
+    if (CurrentHardware.RamGb >= 16 && CurrentHardware.VramGb >= 6)
+    {
+        RecommendedProfile = new GraphicsProfile
+        {
+            Name = "High",
+            TargetFps = 60,
+            TextureQuality = 3,
+            ShadowQuality = 3,
+            AntiAliasingEnabled = true
+        };
+    }
+    else
+    {
+        RecommendedProfile = new GraphicsProfile
+        {
+            Name = "Medium",
+            TargetFps = 45,
+            TextureQuality = 2,
+            ShadowQuality = 1,
+            AntiAliasingEnabled = false
+        };
+    }
+}
+      ]]></programlisting>
+    </section>
+
+    <section xml:id="scenario-health">
+      <title>Обработка урона и восстановление здоровья</title>
+      <para>
+        В этом сценарии модуль HealthAndArmorModule получает величину урона от игровой логики,
+        рассчитывает, какая его часть поглощается бронёй, а какая уменьшает запас здоровья,
+        и позволяет восстанавливать здоровье при использовании аптечек или других источников
+        лечения.
+      </para>
+      <programlisting language="csharp"><![CDATA[
+public void ApplyDamage(int amount)
+{
+    if (amount < 0)
+        throw new ArgumentOutOfRangeException(nameof(amount), "Урон не может быть отрицательным.");
+
+    if (!State.IsAlive)
+        return;
+
+    // Сначала поглощаем урон бронёй.
+    int armorDamage = Math.Min(State.Armor, amount);
+    State.Armor -= armorDamage;
+    amount -= armorDamage;
+
+    // Оставшийся урон уходит в здоровье.
+    if (amount > 0)
+    {
+        State.Health -= amount;
+        if (State.Health < 0)
+            State.Health = 0;
+    }
+}
+      ]]></programlisting>
+    </section>
+
+    <section xml:id="scenario-saves">
+      <title>Сохранение прогресса кампании</title>
+      <para>
+        В данном сценарии модуль SavesAndProgressModule создаёт новое сохранение кампании,
+        фиксируя текущую миссию, момент времени и процент прохождения. Позже сохранение
+        может быть загружено для продолжения игры с того же места.
+      </para>
+      <programlisting language="csharp"><![CDATA[
+public CampaignSaveSnapshot CreateSave(string title, string currentMissionId, int progressPercent)
+{
+    if (string.IsNullOrWhiteSpace(title))
+        throw new ArgumentException("Название сохранения не может быть пустым.", nameof(title));
+
+    if (string.IsNullOrWhiteSpace(currentMissionId))
+        throw new ArgumentException("Идентификатор текущей миссии не может быть пустым.", nameof(currentMissionId));
+
+    string id = Guid.NewGuid().ToString("N");
+    var snapshot = new CampaignSaveSnapshot(
+        id,
+        title,
+        currentMissionId,
+        DateTime.UtcNow,
+        progressPercent);
+
+    _saves.Add(snapshot);
+    return snapshot;
+}
+      ]]></programlisting>
+    </section>
+
+    <section xml:id="scenario-hud">
+      <title>Отображение состояния игрока в HUD</title>
+      <para>
+        В данном сценарии модуль HudModule используется для отображения текущего состояния
+        игрока на экране: здоровья и брони. Игровая логика передаёт обновлённые значения
+        в модуль HUD, который синхронизирует их с пользовательским интерфейсом.
+      </para>
+      <programlisting language="csharp"><![CDATA[
+public void UpdateHealthAndArmor(int health, int armor)
+{
+    State.Health = Math.Max(0, health);
+    State.Armor = Math.Max(0, armor);
+}
+      ]]></programlisting>
+    </section>
+  </chapter>
+</book>
